@@ -1,0 +1,285 @@
+apiVersion: v1
+items:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    generation: 2
+    labels:
+      app: quarkus-quickstart
+      app.kubernetes.io/component: quarkus-quickstart
+      app.kubernetes.io/instance: quarkus-quickstart
+    name: openjdk-17
+    resourceVersion: "296679"
+    uid: 92b70542-bc19-4e29-9546-41c60c35bcdf
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: registry.access.redhat.com/ubi9/openjdk-17
+      from:
+        kind: DockerImage
+        name: registry.access.redhat.com/ubi9/openjdk-17
+      generation: 2
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    generation: 2
+    labels:
+      app: quarkus-quickstart
+      app.kubernetes.io/component: quarkus-quickstart
+      app.kubernetes.io/instance: quarkus-quickstart
+    name: openjdk-17-runtime
+    resourceVersion: "296696"
+    uid: 58712206-bd6c-46a9-a7b7-c963ce086dd8
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: registry.access.redhat.com/ubi9/openjdk-17-runtime
+      generation: 2
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    generation: 1
+    labels:
+      app: quarkus-quickstart
+      app.kubernetes.io/component: quarkus-quickstart
+      app.kubernetes.io/instance: quarkus-quickstart
+    name: quarkus-quickstart
+    resourceVersion: "296954"
+    uid: 19ee2266-5498-4b65-b6ab-acefb7300897
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    generation: 1
+    labels:
+      app: quarkus-quickstart
+      app.kubernetes.io/component: quarkus-quickstart
+      app.kubernetes.io/instance: quarkus-quickstart
+    name: quarkus-quickstart-runtime
+    resourceVersion: "307535"
+    uid: 6c0f1e06-f042-4544-b4b5-0055eeae2fee
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    generation: 1
+    name: quarkus-quickstart
+    resourceVersion: "307723"
+    uid: 534a7a2f-6898-4e7b-a361-2713a7184e2e
+  spec:
+    replicas: 2
+    revisionHistoryLimit: 10
+    selector:
+      app: quarkus-quickstart-runtime
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: quarkus-quickstart-runtime
+      spec:
+        containers:
+        - env:
+          - name: JAVA_OPTS_APPEND
+            value: -XX:MinRAMPercentage=25.0 -Xlog:gc
+          image: quarkus-quickstart-runtime:latest 
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /hello
+              port: 8080
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: quarkus-quickstart-runtime
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /hello
+              port: 8080
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 1500m
+              memory: 256Mi
+            requests:
+              cpu: 500m
+              memory: 128Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - quarkus-quickstart-runtime
+        from:
+          kind: ImageStreamTag
+          name: quarkus-quickstart-runtime:latest
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    generation: 1
+    labels:
+      app: quarkus-quickstart
+      app.kubernetes.io/component: quarkus-quickstart
+      app.kubernetes.io/instance: quarkus-quickstart
+    name: quarkus-quickstart
+    resourceVersion: "296680"
+    uid: 467550e2-22b7-41b5-a442-099a55b6240d
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: quarkus-quickstart:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        ref: memory-config-good
+        uri: https://github.com/jerboaa/quarkus-quickstart.git
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: openjdk-17:latest
+      type: Source
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - github:
+        secret: Z-wfbDyaXeSSgEdCb753
+      type: GitHub
+    - generic:
+        secret: r9Sq6oQJ6TwtLWC17kvr
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    generation: 1
+    labels:
+      app: quarkus-quickstart
+    name: quarkus-quickstart-runtime
+    resourceVersion: "308203"
+    uid: 4721cc80-700f-4a18-8085-66d211f9f9c7
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: quarkus-quickstart-runtime:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      dockerfile: |-
+        FROM -
+        ENV DEF_OPTS="-XX:MaxRAMPercentage=80.0 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90"
+        ENV JAVA_OPTS_APPEND=""
+        COPY deployments /
+        CMD [ "sh", "-c", "exec java $DEF_OPTS $JAVA_OPTS_APPEND -jar /deployments/quarkus-run.jar" ]
+      images:
+      - from:
+          kind: ImageStreamTag
+          name: quarkus-quickstart:latest
+        paths:
+        - destinationDir: ./deployments
+          sourcePath: /deployments
+      type: Dockerfile
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: openjdk-17-runtime:latest
+      type: Docker
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: quarkus-quickstart
+    resourceVersion: "301550"
+    uid: 6aba5548-493e-426d-9601-202a3a9075ff
+  spec:
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: quarkus-quickstart-runtime
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    name: quarkus-quickstart
+    resourceVersion: "301904"
+    uid: 810d786c-0b38-4115-9767-438e2839a4bd
+  spec:
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: quarkus-quickstart
+      weight: 100
+    wildcardPolicy: None
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
