@@ -13,10 +13,10 @@ public class GreetingResource {
     GreetingService service;
 
     @GET
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/greeting/{name}")
-    public String greeting(String name) {
-        return service.greeting(name);
+    public Greet greeting(String name) {
+        return new Greet(service.greeting(name));
     }
 
     @GET
