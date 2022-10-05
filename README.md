@@ -7,6 +7,10 @@ Under the hood, this demo uses:
 - RESTEasy to expose the REST endpoints
 - REST-assured and JUnit 5 for endpoint testing
 
+Various OpenShift resources have been developed in order to show-case
+some deployment scenarios of this application in containers.
+See [4c04ae13250a8351aba20ba569e44e587807fe78](https://github.com/jerboaa/quarkus-quickstart/commit/4c04ae13250a8351aba20ba569e44e587807fe78) for details.
+
 ## Requirements
 
 To compile and run this demo you will need:
