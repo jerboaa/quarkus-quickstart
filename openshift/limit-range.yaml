@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  creationTimestamp: "2022-09-06T07:28:44Z"
+  name: openjdk-default-limits-build
+  resourceVersion: "471659"
+  uid: 5f8b8023-4afb-4f0e-9307-347274573593
+spec:
+  limits:
+  - default:
+      cpu: "2"
+      memory: 1Gi
+    defaultRequest:
+      cpu: "1"
+      memory: 512Mi
+    type: Container
